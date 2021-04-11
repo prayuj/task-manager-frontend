@@ -1,7 +1,8 @@
 import {
   BrowserRouter as Router,
   Switch,
-  Route
+  Route,
+  Redirect
 } from "react-router-dom";
 import PrivateRoute from './components/privateRoute'
 import Login from './components/login'
@@ -18,6 +19,13 @@ function App() {
           <Route path="/login">
             <Login />
           </Route>
+          <PrivateRoute>
+            <Redirect
+              to={{
+                pathname: "/",
+              }}
+            />
+          </PrivateRoute>
         </Switch>
       </Router>
     </div>

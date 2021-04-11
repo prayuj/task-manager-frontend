@@ -2,12 +2,12 @@ import {
     Route,
     Redirect
 } from "react-router-dom";
+import { isLogin } from "../utils"
 const PrivateRoute = ({ children, ...rest }) => {
-    const auth = {}
     return (<Route
         {...rest}
         render={({ location }) =>
-            auth.user ? (
+            isLogin() ? (
                 children
             ) : (
                 <Redirect
