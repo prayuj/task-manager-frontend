@@ -7,6 +7,7 @@ import {
 import PrivateRoute from './components/privateRoute'
 import Login from './components/login'
 import Register from './components/register'
+import Dashboard from './components/dashboard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -16,7 +17,7 @@ function App() {
       <Router>
         <Switch>
           <PrivateRoute exact path="/">
-            <div>Dashboard</div>
+            <Dashboard />
           </PrivateRoute>
           <Route exact path="/register">
             <Register />
