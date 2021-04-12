@@ -6,6 +6,8 @@ import {
 } from "react-router-dom";
 import PrivateRoute from './components/privateRoute'
 import Login from './components/login'
+import Register from './components/register'
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
 function App() {
@@ -16,7 +18,10 @@ function App() {
           <PrivateRoute exact path="/">
             <div>Dashboard</div>
           </PrivateRoute>
-          <Route path="/login">
+          <Route exact path="/register">
+            <Register />
+          </Route>
+          <Route exact path="/login">
             <Login />
           </Route>
           <PrivateRoute>

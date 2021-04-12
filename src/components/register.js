@@ -6,8 +6,8 @@ import styled from 'styled-components'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import axios from 'axios'
-import { login, isLogin } from "../utils"
-import { useState, useEffect } from 'react';
+import { login } from "../utils"
+import { useState } from 'react';
 import {
     Redirect
 } from "react-router-dom";
@@ -21,23 +21,21 @@ const StyledContainer = styled(Container)`
 
 
 
-const Login = () => {
+const Register = () => {
     const [userLoggedIn, setLogin] = useState(false);
-    useEffect(() => {
-        setLogin(isLogin());
-    })
-    const loginHandler = event => {
+    const registerHandler = event => {
         event.preventDefault();
         const email = event.target.elements.email.value
         const password = event.target.elements.password.value
+        const name = event.target.elements.name.value
         const options = {
             method: 'POST',
-            data: { email: email, password: password },
-            url: 'http://localhost:3001/users/login',
+            data: { email, password, name },
+            url: 'http://localhost:3001/users',
         };
         axios(options)
             .then(res => {
-                if (res.status === 200) {
+                if (res.status === 201) {
                     login(res.data.token);
                     setLogin(true);
                 }
@@ -56,7 +54,11 @@ const Login = () => {
                 <Col>
                     <Card>
                         <Card.Body>
-                            <Form onSubmit={loginHandler}>
+                            <Form onSubmit={registerHandler}>
+                                <Form.Group>
+                                    <Form.Label>Name</Form.Label>
+                                    <Form.Control type="text" placeholder="Enter Name" name="name" required />
+                                </Form.Group>
                                 <Form.Group controlId="formBasicEmail">
                                     <Form.Label>Email address</Form.Label>
                                     <Form.Control type="email" placeholder="Enter email" name="email" required />
@@ -78,4 +80,4 @@ const Login = () => {
 
 }
 
-export default Login;
+export default Register;
