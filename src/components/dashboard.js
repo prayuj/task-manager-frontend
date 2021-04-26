@@ -5,6 +5,7 @@ import Modal from 'react-bootstrap/Modal'
 import styled from 'styled-components'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
+import Loader from './loader'
 import axios from 'axios'
 import { logout, getToken } from "../utils"
 import { useState, useEffect } from 'react';
@@ -20,17 +21,9 @@ const StyledContainer = styled(Container)`
 const Dashboard = () => {
     const [shouldComponentUpdate, setShouldComponentUpdate] = useState(true)
     const [tasks, updateTasks] = useState([])
-    const [addTaskShow, setAddTaskShow] = useState(false);
-    const [editTaskShow, setEditTaskShow] = useState(false);
     const [modalShow, setModalShow] = useState(false);
     const [modalType, setModalType] = useState({});
-    // const [editTask]
-
-    const handleAddTaskClose = () => setAddTaskShow(false);
-    const handleAddTaskShow = () => setAddTaskShow(true);
-
-    const handleEditTaskClose = () => setEditTaskShow(false);
-    const handleEditTaskShow = () => setEditTaskShow(true);
+    const [showLoader, setShowLoader] = useState(true)
 
     const handleModalShow = () => setModalShow(true)
     const handleModalClose = () => setModalShow(false)
@@ -46,6 +39,7 @@ const Dashboard = () => {
         axios(options)
             .then(res => {
                 setShouldComponentUpdate(false)
+                setShowLoader(false)
                 updateTasks(res.data)
             })
             .catch(err => {
@@ -55,6 +49,8 @@ const Dashboard = () => {
     }
 
     const deleteTask = event => {
+        setShowLoader(true)
+        handleModalClose()
         if (event && event.target && event.target.id) {
             const options = {
                 method: 'DELETE',
@@ -66,7 +62,6 @@ const Dashboard = () => {
             axios(options)
                 .then(res => {
                     setShouldComponentUpdate(true)
-                    handleModalClose()
                 })
                 .catch(err => {
                     if (err.response.status === 401)
@@ -76,6 +71,9 @@ const Dashboard = () => {
     }
 
     const addTaskHandler = event => {
+        setShowLoader(true)
+        handleModalClose()
+
         event.preventDefault();
         const description = event.target.elements.description.value
         const completed = event.target.elements.completed.checked
@@ -91,7 +89,6 @@ const Dashboard = () => {
             .then(res => {
                 if (res.status === 201) {
                     setShouldComponentUpdate(true)
-                    handleModalClose()
                 }
             })
             .catch(err => {
@@ -101,7 +98,11 @@ const Dashboard = () => {
     }
 
     const updateTaskHandler = event => {
+        setShowLoader(true)
+        handleModalClose()
+
         event.preventDefault();
+
         const description = event.target.elements.description.value
         const completed = event.target.elements.completed.checked
         const id = event.target.id
@@ -117,7 +118,6 @@ const Dashboard = () => {
             .then(res => {
                 if (res.status === 200) {
                     setShouldComponentUpdate(true)
-                    handleModalClose()
                 }
             })
             .catch(err => {
@@ -138,7 +138,7 @@ const Dashboard = () => {
     }
 
     const handleEditTaskModalShow = (event) => {
-        console.log(event.target.id)
+        setShowLoader(true)
         const options = {
             method: 'GET',
             url: process.env.REACT_APP_TASKMANAGER_API + '/tasks/' + event.target.id,
@@ -161,6 +161,8 @@ const Dashboard = () => {
                                 Delete
                             </Button>
                     })
+
+                    setShowLoader(false)
                     handleModalShow()
                 }
             })
@@ -178,7 +180,7 @@ const Dashboard = () => {
 
     return (
         <StyledContainer>
-            <Row>
+            <Row className={`${showLoader ? 'blur' : ''}`}>
                 <Table responsive>
                     <thead>
                         <tr>
@@ -224,7 +226,8 @@ const Dashboard = () => {
                     </Modal.Footer>
                 </Form>
             </Modal>
-        </StyledContainer>
+            <Loader show={showLoader} />
+        </StyledContainer >
     );
 }
 
