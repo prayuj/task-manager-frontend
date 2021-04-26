@@ -6,6 +6,7 @@ import styled from 'styled-components'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import Loader from './loader'
+import AlertComponent from './alert'
 import axios from 'axios'
 import { logout, getToken } from "../utils"
 import { useState, useEffect } from 'react';
@@ -24,6 +25,7 @@ const Dashboard = () => {
     const [modalShow, setModalShow] = useState(false);
     const [modalType, setModalType] = useState({});
     const [showLoader, setShowLoader] = useState(true)
+    const [alert, setAlert] = useState({ show: false })
 
     const handleModalShow = () => setModalShow(true)
     const handleModalClose = () => setModalShow(false)
@@ -61,6 +63,7 @@ const Dashboard = () => {
             };
             axios(options)
                 .then(res => {
+                    alertHandler('warning ', 'Deleted Successfully')
                     setShouldComponentUpdate(true)
                 })
                 .catch(err => {
@@ -88,6 +91,7 @@ const Dashboard = () => {
         axios(options)
             .then(res => {
                 if (res.status === 201) {
+                    alertHandler('success ', 'Added Successfully')
                     setShouldComponentUpdate(true)
                 }
             })
@@ -117,6 +121,7 @@ const Dashboard = () => {
         axios(options)
             .then(res => {
                 if (res.status === 200) {
+                    alertHandler('secondary', 'Updated Successfully')
                     setShouldComponentUpdate(true)
                 }
             })
@@ -172,6 +177,16 @@ const Dashboard = () => {
             })
     }
 
+    const alertHandler = (type, message) => {
+        setAlert({
+            show: true,
+            type: type,
+            message: message
+        })
+        const timeout = setTimeout(() => setAlert({ show: false }), 3000);
+        return () => clearTimeout(timeout);
+    }
+
     useEffect(() => {
         if (shouldComponentUpdate) {
             getTasks()
@@ -180,7 +195,7 @@ const Dashboard = () => {
 
     return (
         <StyledContainer>
-            <Row className={`${showLoader ? 'blur' : ''}`}>
+            <Row className={`${showLoader || alert.show ? 'blur' : ''}`}>
                 <Table responsive>
                     <thead>
                         <tr>
@@ -227,6 +242,7 @@ const Dashboard = () => {
                 </Form>
             </Modal>
             <Loader show={showLoader} />
+            <AlertComponent show={alert.show} type={alert.type} message={alert.message} />
         </StyledContainer >
     );
 }
