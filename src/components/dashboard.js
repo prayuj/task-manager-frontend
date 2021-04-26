@@ -210,7 +210,7 @@ const Dashboard = () => {
                         <tbody>
                             <tr key={i}>
                                 <td>{i + 1}</td>
-                                <td>{task.description}</td>
+                                <td className={`${task.completed ? 'done' : ''}`}>{task.description}</td>
                                 <td>
                                     <Button variant='warning' id={task._id} onClick={handleEditTaskModalShow} size="sm">Edit</Button>
                                 </td>
