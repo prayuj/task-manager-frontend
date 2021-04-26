@@ -1,8 +1,7 @@
 import Spinner from 'react-bootstrap/Spinner'
 import styled from 'styled-components'
-const Loader = ({ show }) => {
 
-    const StyledDiv = styled.div`
+const StyledDiv = styled.div`
         position: fixed;
         height: 100vh;
         width: 100vh;
@@ -11,6 +10,8 @@ const Loader = ({ show }) => {
         justify-content: center;
         align-items: center;
     `
+
+const Loader = ({ show }) => {
 
     if (show) {
         return (
