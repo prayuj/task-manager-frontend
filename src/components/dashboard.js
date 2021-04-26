@@ -1,14 +1,11 @@
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import Table from 'react-bootstrap/Table';
 import Modal from 'react-bootstrap/Modal'
 import styled from 'styled-components'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import axios from 'axios'
-import {
-    Redirect
-} from "react-router-dom";
 import { logout, getToken } from "../utils"
 import { useState, useEffect } from 'react';
 
@@ -21,9 +18,12 @@ const StyledContainer = styled(Container)`
 `
 
 const Dashboard = () => {
+    const [shouldComponentUpdate, setShouldComponentUpdate] = useState(true)
     const [tasks, updateTasks] = useState([])
     const [addTaskShow, setAddTaskShow] = useState(false);
     const [editTaskShow, setEditTaskShow] = useState(false);
+    const [modalShow, setModalShow] = useState(false);
+    const [modalType, setModalType] = useState({});
     // const [editTask]
 
     const handleAddTaskClose = () => setAddTaskShow(false);
@@ -32,16 +32,22 @@ const Dashboard = () => {
     const handleEditTaskClose = () => setEditTaskShow(false);
     const handleEditTaskShow = () => setEditTaskShow(true);
 
+    const handleModalShow = () => setModalShow(true)
+    const handleModalClose = () => setModalShow(false)
+
     const getTasks = () => {
         const options = {
             method: 'GET',
-            url: 'http://localhost:3001/tasks',
+            url: process.env.REACT_APP_TASKMANAGER_API + '/tasks',
             headers: {
                 Authorization: `Bearer ${getToken()}`
             }
         };
         axios(options)
-            .then(res => updateTasks(res.data))
+            .then(res => {
+                setShouldComponentUpdate(false)
+                updateTasks(res.data)
+            })
             .catch(err => {
                 if (err.response.status === 401)
                     logout()
@@ -52,13 +58,16 @@ const Dashboard = () => {
         if (event && event.target && event.target.id) {
             const options = {
                 method: 'DELETE',
-                url: 'http://localhost:3001/tasks/' + event.target.id,
+                url: process.env.REACT_APP_TASKMANAGER_API + '/tasks/' + event.target.id,
                 headers: {
                     Authorization: `Bearer ${getToken()}`
                 }
             };
             axios(options)
-                .then(res => getTasks())
+                .then(res => {
+                    setShouldComponentUpdate(true)
+                    handleModalClose()
+                })
                 .catch(err => {
                     if (err.response.status === 401)
                         logout()
@@ -73,7 +82,7 @@ const Dashboard = () => {
         const options = {
             method: 'POST',
             data: { description, completed },
-            url: 'http://localhost:3001/tasks',
+            url: process.env.REACT_APP_TASKMANAGER_API + '/tasks',
             headers: {
                 Authorization: `Bearer ${getToken()}`
             }
@@ -81,8 +90,8 @@ const Dashboard = () => {
         axios(options)
             .then(res => {
                 if (res.status === 201) {
-                    getTasks()
-                    handleAddTaskClose()
+                    setShouldComponentUpdate(true)
+                    handleModalClose()
                 }
             })
             .catch(err => {
@@ -95,10 +104,11 @@ const Dashboard = () => {
         event.preventDefault();
         const description = event.target.elements.description.value
         const completed = event.target.elements.completed.checked
+        const id = event.target.id
         const options = {
-            method: 'POST',
+            method: 'PATCH',
             data: { description, completed },
-            url: 'http://localhost:3001/tasks/',
+            url: process.env.REACT_APP_TASKMANAGER_API + '/tasks/' + id,
             headers: {
                 Authorization: `Bearer ${getToken()}`
             }
@@ -106,8 +116,52 @@ const Dashboard = () => {
         axios(options)
             .then(res => {
                 if (res.status === 200) {
-                    getTasks()
-                    handleAddTaskClose()
+                    setShouldComponentUpdate(true)
+                    handleModalClose()
+                }
+            })
+            .catch(err => {
+                if (err.response.status === 401)
+                    logout()
+            })
+    }
+
+    const handleAddTaskModalShow = () => {
+        setModalType({
+            action: 'add',
+            title: 'Add Task',
+            description: '',
+            completed: true,
+            handler: addTaskHandler
+        })
+        handleModalShow()
+    }
+
+    const handleEditTaskModalShow = (event) => {
+        console.log(event.target.id)
+        const options = {
+            method: 'GET',
+            url: process.env.REACT_APP_TASKMANAGER_API + '/tasks/' + event.target.id,
+            headers: {
+                Authorization: `Bearer ${getToken()}`
+            }
+        };
+        axios(options)
+            .then(res => {
+                if (res.status === 200) {
+                    setModalType({
+                        action: 'edit',
+                        title: 'Edit Task',
+                        _id: res.data._id,
+                        description: res.data.description,
+                        completed: res.data.completed,
+                        handler: updateTaskHandler,
+                        deleteJSX:
+                            <Button variant="danger" id={res.data._id} onClick={deleteTask}>
+                                Delete
+                            </Button>
+                    })
+                    handleModalShow()
                 }
             })
             .catch(err => {
@@ -117,71 +171,55 @@ const Dashboard = () => {
     }
 
     useEffect(() => {
-        getTasks()
-    });
+        if (shouldComponentUpdate) {
+            getTasks()
+        }
+    }, [shouldComponentUpdate]);
+
     return (
         <StyledContainer>
             <Row>
-                <Col>Tasks</Col>
-                <Col>
-                    <Button variant='primary' onClick={handleAddTaskShow}>Add</Button>
-                </Col>
+                <Table responsive>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Task</th>
+                            <th>
+                                <Button variant='primary' onClick={handleAddTaskModalShow} size="sm">Add</Button>
+                            </th>
+                        </tr>
+                    </thead>
+                    {tasks.map((task, i) => (
+                        <tbody>
+                            <tr key={i}>
+                                <td>{i + 1}</td>
+                                <td>{task.description}</td>
+                                <td>
+                                    <Button variant='warning' id={task._id} onClick={handleEditTaskModalShow} size="sm">Edit</Button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    ))}
+                </Table>
             </Row>
-            {tasks.map(task => (
-                <Row key={task._id}>
-                    <Col>
-                        {task.description}
-                    </Col>
-                    <Col>
-                        <Button variant='warning' id={task._id} onClick={handleEditTaskShow}>Update</Button>
-                        <Button variant='danger' id={task._id} onClick={deleteTask}>Del</Button>
-                    </Col>
-                </Row>
-            ))}
-            <Modal show={addTaskShow} onHide={handleAddTaskClose}>
-                <Form onSubmit={addTaskHandler}>
+            <Modal show={modalShow} onHide={handleModalClose} centered>
+                <Form onSubmit={modalType.handler} id={modalType._id}>
                     <Modal.Header closeButton>
-                        <Modal.Title>Add Task</Modal.Title>
+                        <Modal.Title>{modalType.title}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <Form.Group>
                             <Form.Label>Task</Form.Label>
-                            <Form.Control type="text" placeholder="Enter Task Description" name="description" required />
+                            <Form.Control type="text" placeholder="Enter Task Description" name="description" required defaultValue={modalType.description} />
                         </Form.Group>
                         <Form.Group controlId="formBasicCheckbox">
-                            <Form.Check type="checkbox" label="Completed" name="completed" defaultChecked />
+                            <Form.Check type="checkbox" label="Completed" name="completed" defaultChecked={modalType.completed} />
                         </Form.Group>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={handleAddTaskClose}>
-                            Close
-                        </Button>
+                        {modalType.deleteJSX}
                         <Button variant="primary" type="submit">
-                            Add Task
-                        </Button>
-                    </Modal.Footer>
-                </Form>
-            </Modal>
-            <Modal show={editTaskShow} onHide={handleEditTaskClose}>
-                <Form onSubmit={addTaskHandler}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Edit Task</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Form.Group>
-                            <Form.Label>Task</Form.Label>
-                            <Form.Control type="text" placeholder="Enter Task Description" name="description" required />
-                        </Form.Group>
-                        <Form.Group controlId="formBasicCheckbox">
-                            <Form.Check type="checkbox" label="Completed" name="completed" defaultChecked />
-                        </Form.Group>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={handleEditTaskClose}>
-                            Close
-                        </Button>
-                        <Button variant="primary" type="submit">
-                            Add Task
+                            {modalType.title}
                         </Button>
                     </Modal.Footer>
                 </Form>

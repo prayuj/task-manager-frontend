@@ -31,7 +31,7 @@ const Register = () => {
         const options = {
             method: 'POST',
             data: { email, password, name },
-            url: 'http://localhost:3001/users',
+            url: process.env.REACT_APP_TASKMANAGER_API + '/users',
         };
         axios(options)
             .then(res => {
