@@ -50,7 +50,11 @@ const Dashboard = () => {
                 setShouldGetTasks(false)
                 setShowLoader(false)
                 updateTasks(res.data.tasks)
-                setNumberOfPages(res.data.total % 10 === 0 ? res.data.total / 10 : Math.floor(res.data.total / 10) + 1);
+                var pages = (res.data.total % 10 === 0 ? res.data.total / 10 : Math.floor(res.data.total / 10) + 1)
+                setNumberOfPages(pages);
+                if (activePage > pages) {
+                    setPageHandler(1)
+                }
                 if (!isMount) {
                     setIsMounted(true)
                 }
@@ -230,6 +234,7 @@ const Dashboard = () => {
     }
 
     const readURLParam = () => {
+        setShowLoader(true)
         const search = history.location.search
         if (search.indexOf('?') !== -1) {
             const params = search.split('?')[1].split('&')
@@ -258,7 +263,11 @@ const Dashboard = () => {
 
         if (!isMount) readURLParam()
 
-    }, [shouldGetTasks, isMount]);
+        return history.listen((location) => {
+            readURLParam()
+        })
+
+    }, [shouldGetTasks, isMount, history]);
 
     return (
         <StyledContainer>
