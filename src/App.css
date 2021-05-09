@@ -5,3 +5,13 @@
 .done {
   text-decoration: line-through;
 }
+
+.logout {
+  position: absolute;
+  top: 15px;
+  right: 5px;
+}
+
+.display-flex {
+  display: flex;
+}

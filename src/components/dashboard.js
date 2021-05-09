@@ -5,6 +5,8 @@ import Modal from 'react-bootstrap/Modal'
 import styled from 'styled-components'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
+import DropdownButton from 'react-bootstrap/DropdownButton'
+import Dropdown from 'react-bootstrap/Dropdown'
 import Loader from './loader'
 import AlertComponent from './alert'
 import axios from 'axios'
@@ -17,6 +19,7 @@ const StyledContainer = styled(Container)`
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    position:relative;
 `
 
 const Dashboard = () => {
@@ -26,6 +29,7 @@ const Dashboard = () => {
     const [modalType, setModalType] = useState({});
     const [showLoader, setShowLoader] = useState(true)
     const [alert, setAlert] = useState({ show: false })
+    const [numberToShow, setNumberToShow] = useState('all')
 
     const handleModalShow = () => setModalShow(true)
     const handleModalClose = () => setModalShow(false)
@@ -33,7 +37,7 @@ const Dashboard = () => {
     const getTasks = () => {
         const options = {
             method: 'GET',
-            url: process.env.REACT_APP_TASKMANAGER_API + '/tasks',
+            url: process.env.REACT_APP_TASKMANAGER_API + `/tasks?limit=${numberToShow}`,
             headers: {
                 Authorization: `Bearer ${getToken()}`
             }
@@ -187,6 +191,12 @@ const Dashboard = () => {
         return () => clearTimeout(timeout);
     }
 
+    const numberToShowHandler = (e) => {
+        setShowLoader(true)
+        setNumberToShow(e);
+        setShouldComponentUpdate(true);
+    }
+
     useEffect(() => {
         if (shouldComponentUpdate) {
             getTasks()
@@ -195,13 +205,21 @@ const Dashboard = () => {
 
     return (
         <StyledContainer>
+            <Button onClick={logout} variant="danger" size='sm' className="logout">Logout</Button>
             <Row className={`${showLoader || alert.show ? 'blur' : ''}`}>
                 <Table responsive>
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Task</th>
-                            <th>
+                            <th className="display-flex">
+                                Task
+                                <DropdownButton variant='primary' size="sm" title={'View'} onSelect={numberToShowHandler}>
+                                    <Dropdown.Item eventKey="5" active={'5' === numberToShow}>5</Dropdown.Item>
+                                    <Dropdown.Item eventKey="10" active={'10' === numberToShow}>10</Dropdown.Item>
+                                    <Dropdown.Item eventKey="all" active={'all' === numberToShow}>All</Dropdown.Item>
+                                </DropdownButton>
+                            </th>
+                            <th >
                                 <Button variant='primary' onClick={handleAddTaskModalShow} size="sm">Add</Button>
                             </th>
                         </tr>
@@ -212,7 +230,7 @@ const Dashboard = () => {
                                 <td>{i + 1}</td>
                                 <td className={`${task.completed ? 'done' : ''}`}>{task.description}</td>
                                 <td>
-                                    <Button variant='warning' id={task._id} onClick={handleEditTaskModalShow} size="sm">Edit</Button>
+                                    <Button variant='warning' id={task._id} onClick={handleEditTaskModalShow} size="sm" >Edit</Button>
                                 </td>
                             </tr>
                         </tbody>
