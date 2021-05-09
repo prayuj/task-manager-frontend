@@ -12,6 +12,6 @@
   right: 5px;
 }
 
-.display-flex {
-  display: flex;
+.justify-content-center {
+  justify-content: center;
 }

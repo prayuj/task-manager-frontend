@@ -11,6 +11,7 @@ import axios from 'axios'
 import { logout, getToken } from "../utils/utils"
 import { useState, useEffect } from 'react';
 import Pagination from 'react-bootstrap/Pagination'
+import { useHistory, useLocation } from 'react-router-dom';
 
 const StyledContainer = styled(Container)`
     height: 100vh;
@@ -22,12 +23,16 @@ const StyledContainer = styled(Container)`
 `
 
 const Dashboard = () => {
-    const [shouldComponentUpdate, setShouldComponentUpdate] = useState(true)
+    let history = useHistory();
+    const [shouldGetTasks, setShouldGetTasks] = useState(false)
+    const [isMount, setIsMounted] = useState(false);
     const [tasks, updateTasks] = useState([])
     const [modalShow, setModalShow] = useState(false);
     const [modalType, setModalType] = useState({});
     const [showLoader, setShowLoader] = useState(true)
     const [alert, setAlert] = useState({ show: false })
+    const [numberOfPages, setNumberOfPages] = useState(1)
+    const [activePage, setActivePage] = useState(1)
 
     const handleModalShow = () => setModalShow(true)
     const handleModalClose = () => setModalShow(false)
@@ -35,16 +40,20 @@ const Dashboard = () => {
     const getTasks = () => {
         const options = {
             method: 'GET',
-            url: process.env.REACT_APP_TASKMANAGER_API + `/tasks?limit=10}`,
+            url: process.env.REACT_APP_TASKMANAGER_API + `/tasks?limit=10&skip=${10 * (activePage - 1)}`,
             headers: {
                 Authorization: `Bearer ${getToken()}`
             }
         };
         axios(options)
             .then(res => {
-                setShouldComponentUpdate(false)
+                setShouldGetTasks(false)
                 setShowLoader(false)
-                updateTasks(res.data)
+                updateTasks(res.data.tasks)
+                setNumberOfPages(res.data.total % 10 === 0 ? res.data.total / 10 : Math.floor(res.data.total / 10) + 1);
+                if (!isMount) {
+                    setIsMounted(true)
+                }
             })
             .catch(err => {
                 if (err.response.status === 401)
@@ -66,7 +75,7 @@ const Dashboard = () => {
             axios(options)
                 .then(res => {
                     alertHandler('warning ', 'Deleted Successfully')
-                    setShouldComponentUpdate(true)
+                    setShouldGetTasks(true)
                 })
                 .catch(err => {
                     if (err.response.status === 401)
@@ -94,7 +103,7 @@ const Dashboard = () => {
             .then(res => {
                 if (res.status === 201) {
                     alertHandler('success ', 'Added Successfully')
-                    setShouldComponentUpdate(true)
+                    setShouldGetTasks(true)
                 }
             })
             .catch(err => {
@@ -124,12 +133,13 @@ const Dashboard = () => {
             .then(res => {
                 if (res.status === 200) {
                     alertHandler('secondary', 'Updated Successfully')
-                    setShouldComponentUpdate(true)
+                    setShouldGetTasks(true)
                 }
             })
             .catch(err => {
                 if (err.response.status === 401)
                     logout()
+            }).finally(() => {
             })
     }
 
@@ -189,16 +199,71 @@ const Dashboard = () => {
         return () => clearTimeout(timeout);
     }
 
+    const setURLParam = (key, value) => {
+        var search = history.location.search
+        if (search.indexOf('?') !== -1) {
+            const params = search.split('?')[1].split('&')
+            search = '?'
+            let updateFlag = false
+            for (var i = 0; i < params.length; i++) {
+                if (params[i].indexOf(key) !== -1) {
+                    search += key + '=' + value
+                    updateFlag = true
+                } else {
+                    search += params[i]
+                }
+                if (i !== params.length - 1) search += '&'
+            }
+            if (!updateFlag) search += '&' + key + '=' + value
+        }
+        else search = '?' + key + '=' + value
+
+        history.push({
+            pathname: '/',
+            search
+        })
+        console.log(search)
+    }
+
+    const unsetURLParam = (key) => {
+
+    }
+
+    const readURLParam = () => {
+        const search = history.location.search
+        if (search.indexOf('?') !== -1) {
+            const params = search.split('?')[1].split('&')
+            for (var i = 0; i < params.length; i++) {
+                if (params[i].indexOf('page') !== -1) {
+                    const pageNumber = parseInt(params[i].split('=')[1])
+                    setActivePage(pageNumber)
+                }
+            }
+        }
+        setShouldGetTasks(true)
+        setIsMounted(true);
+    }
+
+    const setPageHandler = (page) => {
+        setActivePage(page)
+        setShouldGetTasks(true)
+        setShowLoader(true)
+        setURLParam('page', page)
+    }
+
     useEffect(() => {
-        if (shouldComponentUpdate) {
+        if (shouldGetTasks) {
             getTasks()
         }
-    }, [shouldComponentUpdate]);
+
+        if (!isMount) readURLParam()
+
+    }, [shouldGetTasks, isMount]);
 
     return (
         <StyledContainer>
             <Button onClick={logout} variant="danger" size='sm' className="logout">Logout</Button>
-            <Row className={`${showLoader || alert.show ? 'blur' : ''}`}>
+            <Row className={`justify-content-center ${showLoader || alert.show ? 'blur' : ''}`}>
                 <Table responsive>
                     <thead>
                         <tr>
@@ -224,8 +289,11 @@ const Dashboard = () => {
                     ))}
                 </Table>
                 <Pagination>
-                    <Pagination.Prev />
-                    <Pagination.Next />
+                    {[...Array(numberOfPages)].map((x, i) => {
+                        if (i + 1 === activePage) return <Pagination.Item active key={i + 1}>{i + 1}</Pagination.Item>
+                        else return <Pagination.Item key={i + 1} onClick={() => setPageHandler(i + 1)} >{i + 1}</Pagination.Item>
+                    }
+                    )}
                 </Pagination>
             </Row>
             <Modal show={modalShow} onHide={handleModalClose} centered>
