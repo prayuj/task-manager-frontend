@@ -6,7 +6,7 @@ import styled from 'styled-components'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import axios from 'axios'
-import { login, isLogin } from "../utils"
+import { login, isLogin } from "../utils/utils"
 import { useState, useEffect } from 'react';
 import {
     Redirect

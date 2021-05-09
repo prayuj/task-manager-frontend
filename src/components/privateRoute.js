@@ -2,7 +2,7 @@ import {
     Route,
     Redirect
 } from "react-router-dom";
-import { isLogin } from "../utils"
+import { isLogin } from "../utils/utils"
 const PrivateRoute = ({ children, ...rest }) => {
     return (<Route
         {...rest}
