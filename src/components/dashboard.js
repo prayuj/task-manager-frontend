@@ -5,12 +5,12 @@ import Modal from 'react-bootstrap/Modal'
 import styled from 'styled-components'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
-import PaginationTemplate from './pagination'
 import Loader from './loader'
 import AlertComponent from './alert'
 import axios from 'axios'
 import { logout, getToken } from "../utils/utils"
 import { useState, useEffect } from 'react';
+import Pagination from 'react-bootstrap/Pagination'
 
 const StyledContainer = styled(Container)`
     height: 100vh;
@@ -223,7 +223,10 @@ const Dashboard = () => {
                         </tbody>
                     ))}
                 </Table>
-                <PaginationTemplate />
+                <Pagination>
+                    <Pagination.Prev />
+                    <Pagination.Next />
+                </Pagination>
             </Row>
             <Modal show={modalShow} onHide={handleModalClose} centered>
                 <Form onSubmit={modalType.handler} id={modalType._id}>
