@@ -35,7 +35,11 @@ const Dashboard = () => {
     const [activePage, setActivePage] = useState(1)
 
     const handleModalShow = () => setModalShow(true)
-    const handleModalClose = () => setModalShow(false)
+    const handleModalClose = () => {
+        setModalShow(false)
+        unsetURLParam('add_task')
+        unsetURLParam('edit_task')
+    }
 
     const getTasks = () => {
         const options = {
@@ -148,6 +152,7 @@ const Dashboard = () => {
     }
 
     const handleAddTaskModalShow = () => {
+        setURLParam('add_task', true)
         setModalType({
             action: 'add',
             title: 'Add Task',
@@ -159,6 +164,7 @@ const Dashboard = () => {
     }
 
     const handleEditTaskModalShow = (event) => {
+        setURLParam('edit_task', event.target.id)
         setShowLoader(true)
         const options = {
             method: 'GET',
@@ -226,24 +232,61 @@ const Dashboard = () => {
             pathname: '/',
             search
         })
-        console.log(search)
     }
 
     const unsetURLParam = (key) => {
+        var search = history.location.search
+        if (search.indexOf('?') !== -1) {
+            const params = search.split('?')[1].split('&')
+            search = '?'
+            for (var i = 0; i < params.length; i++) {
+                if (params[i].indexOf(key) !== -1) continue
+                else search += params[i]
+                search += '&'
+            }
+            if (search !== '?') {
+                search = search[search.length - 1] === '&' ? search.slice(0, search.length - 1) : search
+                history.push({
+                    pathname: '/',
+                    search
+                })
+            } else {
+                history.push({
+                    pathname: '/'
+                })
+            }
 
+        }
     }
 
     const readURLParam = () => {
         setShowLoader(true)
         const search = history.location.search
+        let pageNumberFlag = false
         if (search.indexOf('?') !== -1) {
             const params = search.split('?')[1].split('&')
             for (var i = 0; i < params.length; i++) {
                 if (params[i].indexOf('page') !== -1) {
                     const pageNumber = parseInt(params[i].split('=')[1])
+                    pageNumberFlag = true
                     setActivePage(pageNumber)
                 }
+                else if (params[i].indexOf('add_task') !== -1) {
+                    handleAddTaskModalShow()
+                }
+                else if (params[i].indexOf('edit_task') !== -1) {
+                    handleEditTaskModalShow(
+                        {
+                            target: {
+                                id: params[i].split('=')[1]
+                            }
+                        })
+                }
             }
+        }
+        if (!pageNumberFlag) {
+            setActivePage(1)
+            setURLParam('page', 1)
         }
         setShouldGetTasks(true)
         setIsMounted(true);
@@ -264,7 +307,7 @@ const Dashboard = () => {
         if (!isMount) readURLParam()
 
         return history.listen((location) => {
-            readURLParam()
+            if (history.action === 'POP') readURLParam()
         })
 
     }, [shouldGetTasks, isMount, history]);
@@ -305,7 +348,7 @@ const Dashboard = () => {
                     )}
                 </Pagination>
             </Row>
-            <Modal show={modalShow} onHide={handleModalClose} centered>
+            <Modal show={modalShow} onHide={handleModalClose} centered className={`${showLoader || alert.show ? 'blur' : ''}`}>
                 <Form onSubmit={modalType.handler} id={modalType._id}>
                     <Modal.Header closeButton>
                         <Modal.Title>{modalType.title}</Modal.Title>
@@ -327,8 +370,8 @@ const Dashboard = () => {
                     </Modal.Footer>
                 </Form>
             </Modal>
-            <Loader show={showLoader} />
             <AlertComponent show={alert.show} type={alert.type} message={alert.message} />
+            <Loader show={showLoader} />
         </StyledContainer >
     );
 }

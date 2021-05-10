@@ -5,6 +5,8 @@ import Card from 'react-bootstrap/Card'
 import styled from 'styled-components'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
+import AlertComponent from './alert'
+import Loader from './loader'
 import axios from 'axios'
 import { login, isLogin } from "../utils/utils"
 import { useState, useEffect } from 'react';
@@ -23,11 +25,14 @@ const StyledContainer = styled(Container)`
 
 const Login = () => {
     const [userLoggedIn, setLogin] = useState(false);
+    const [showLoader, setShowLoader] = useState(false)
+    const [alert, setAlert] = useState({ show: false })
     useEffect(() => {
         setLogin(isLogin());
     })
     const loginHandler = event => {
         event.preventDefault();
+        setShowLoader(true)
         const email = event.target.elements.email.value
         const password = event.target.elements.password.value
         const options = {
@@ -42,7 +47,19 @@ const Login = () => {
                     setLogin(true);
                 }
             })
-            .catch(err => console.log(err))
+            .catch(err => {
+                setShowLoader(false)
+                alertHandler('warning ', 'Could Not Authenticate')
+            })
+    }
+    const alertHandler = (type, message) => {
+        setAlert({
+            show: true,
+            type: type,
+            message: message
+        })
+        const timeout = setTimeout(() => setAlert({ show: false }), 3000);
+        return () => clearTimeout(timeout);
     }
     if (userLoggedIn)
         return (<Redirect
@@ -52,10 +69,11 @@ const Login = () => {
         />)
     else
         return (<StyledContainer>
-            <Row>
+            <Row className={`${showLoader || alert.show ? 'blur' : ''}`}>
                 <Col>
                     <Card>
                         <Card.Body>
+                            <h3>Login In</h3>
                             <Form onSubmit={loginHandler}>
                                 <Form.Group controlId="formBasicEmail">
                                     <Form.Label>Email address</Form.Label>
@@ -74,7 +92,9 @@ const Login = () => {
                     </Card>
                 </Col>
             </Row>
-        </StyledContainer>);
+            <Loader show={showLoader} />
+            <AlertComponent show={alert.show} type={alert.type} message={alert.message} />
+        </StyledContainer >);
 
 }
 

@@ -55,6 +55,7 @@ const Register = () => {
                     <Col>
                         <Card>
                             <Card.Body>
+                                <h3>Register</h3>
                                 <Form onSubmit={registerHandler}>
                                     <Form.Group>
                                         <Form.Label>Name</Form.Label>
