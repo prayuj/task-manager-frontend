@@ -11,7 +11,8 @@ import axios from 'axios'
 import { login, isLogin } from "../utils/utils"
 import { useState, useEffect } from 'react';
 import {
-    Redirect
+    Redirect,
+    Link
 } from "react-router-dom";
 
 const StyledContainer = styled(Container)`
@@ -73,7 +74,7 @@ const Login = () => {
                 <Col>
                     <Card>
                         <Card.Body>
-                            <h3>Login In</h3>
+                            <h3>Login</h3>
                             <Form onSubmit={loginHandler}>
                                 <Form.Group controlId="formBasicEmail">
                                     <Form.Label>Email address</Form.Label>
@@ -89,6 +90,11 @@ const Login = () => {
                         </Button>
                             </Form>
                         </Card.Body>
+                        <Link to="/register">
+                            <Button variant="outline-success" style={{ width: '100%' }}>
+                                Don't have an account? Register Here.
+                            </Button>
+                        </Link>
                     </Card>
                 </Col>
             </Row>

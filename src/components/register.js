@@ -5,11 +5,14 @@ import Card from 'react-bootstrap/Card'
 import styled from 'styled-components'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
+import AlertComponent from './alert'
+import Loader from './loader'
 import axios from 'axios'
 import { login } from "../utils/utils"
 import { useState } from 'react';
 import {
-    Redirect
+    Redirect,
+    Link
 } from "react-router-dom";
 
 const StyledContainer = styled(Container)`
@@ -23,8 +26,11 @@ const StyledContainer = styled(Container)`
 
 const Register = () => {
     const [userLoggedIn, setLogin] = useState(false);
+    const [showLoader, setShowLoader] = useState(false)
+    const [alert, setAlert] = useState({ show: false })
     const registerHandler = event => {
         event.preventDefault();
+        setShowLoader(true)
         const email = event.target.elements.email.value
         const password = event.target.elements.password.value
         const name = event.target.elements.name.value
@@ -40,8 +46,22 @@ const Register = () => {
                     setLogin(true);
                 }
             })
-            .catch(err => console.log(err))
+            .catch(err => {
+                alertHandler('warning', 'Could Not Register')
+                setShowLoader(false)
+            })
     }
+
+    const alertHandler = (type, message) => {
+        setAlert({
+            show: true,
+            type: type,
+            message: message
+        })
+        const timeout = setTimeout(() => setAlert({ show: false }), 3000);
+        return () => clearTimeout(timeout);
+    }
+
     if (userLoggedIn)
         return (<Redirect
             to={{
@@ -51,7 +71,7 @@ const Register = () => {
     else
         return (
             <StyledContainer>
-                <Row>
+                <Row className={`${showLoader || alert.show ? 'blur' : ''}`}>
                     <Col>
                         <Card>
                             <Card.Body>
@@ -75,9 +95,16 @@ const Register = () => {
                         </Button>
                                 </Form>
                             </Card.Body>
+                            <Link to="/login">
+                                <Button variant="outline-success" style={{ width: '100%' }}>
+                                    Already Signed up? Login Here.
+                                </Button>
+                            </Link>
                         </Card>
                     </Col>
                 </Row>
+                <Loader show={showLoader} />
+                <AlertComponent show={alert.show} type={alert.type} message={alert.message} />
             </StyledContainer>);
 
 }
