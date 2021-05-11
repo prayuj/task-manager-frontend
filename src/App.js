@@ -19,10 +19,10 @@ function App() {
           <PrivateRoute exact path="/">
             <Dashboard />
           </PrivateRoute>
-          <Route exact path="/register">
+          <Route path="/register">
             <Register />
           </Route>
-          <Route exact path="/login">
+          <Route path="/login">
             <Login />
           </Route>
           <PrivateRoute>
