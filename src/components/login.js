@@ -25,12 +25,15 @@ const StyledContainer = styled(Container)`
 
 
 const Login = () => {
+    const [isMount, setIsMounted] = useState(false);
     const [userLoggedIn, setLogin] = useState(false);
     const [showLoader, setShowLoader] = useState(false)
     const [alert, setAlert] = useState({ show: false })
     useEffect(() => {
-        setLogin(isLogin());
-    })
+        if (isMount)
+            setLogin(isLogin());
+        setIsMounted(true);
+    }, [isMount])
     const loginHandler = event => {
         event.preventDefault();
         setShowLoader(true)

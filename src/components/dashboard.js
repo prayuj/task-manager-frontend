@@ -11,7 +11,7 @@ import axios from 'axios'
 import { logout, getToken } from "../utils/utils"
 import { useState, useEffect } from 'react';
 import Pagination from 'react-bootstrap/Pagination'
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 const StyledContainer = styled(Container)`
     height: 100vh;
@@ -300,6 +300,7 @@ const Dashboard = () => {
     }
 
     useEffect(() => {
+
         if (shouldGetTasks) {
             getTasks()
         }
@@ -310,7 +311,7 @@ const Dashboard = () => {
             if (history.action === 'POP') readURLParam()
         })
 
-    }, [shouldGetTasks, isMount, history]);
+    }, [shouldGetTasks, isMount, history]);// eslint-disable-line react-hooks/exhaustive-deps
 
     return (
         <StyledContainer>
