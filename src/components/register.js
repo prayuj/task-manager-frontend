@@ -20,6 +20,7 @@ const StyledContainer = styled(Container)`
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
 `
 
 
@@ -71,6 +72,7 @@ const Register = () => {
     else
         return (
             <StyledContainer>
+                <h3>Task Manager</h3>
                 <Row className={`${showLoader || alert.show ? 'blur' : ''}`}>
                     <Col>
                         <Card>

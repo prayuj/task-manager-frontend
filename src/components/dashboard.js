@@ -316,6 +316,7 @@ const Dashboard = () => {
     return (
         <StyledContainer>
             <Button onClick={logout} variant="danger" size='sm' className="logout">Logout</Button>
+            <h3>My Tasks</h3>
             <Row className={`justify-content-center ${showLoader || alert.show ? 'blur' : ''}`}>
                 <Table responsive>
                     <thead>

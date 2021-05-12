@@ -20,6 +20,7 @@ const StyledContainer = styled(Container)`
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
 `
 
 
@@ -72,38 +73,40 @@ const Login = () => {
             }}
         />)
     else
-        return (<StyledContainer>
-            <Row className={`${showLoader || alert.show ? 'blur' : ''}`}>
-                <Col>
-                    <Card>
-                        <Card.Body>
-                            <h3>Login</h3>
-                            <Form onSubmit={loginHandler}>
-                                <Form.Group controlId="formBasicEmail">
-                                    <Form.Label>Email address</Form.Label>
-                                    <Form.Control type="email" placeholder="Enter email" name="email" required />
-                                </Form.Group>
+        return (
+            <StyledContainer>
+                <h3>Task Manager</h3>
+                <Row className={`${showLoader || alert.show ? 'blur' : ''}`}>
+                    <Col>
+                        <Card>
+                            <Card.Body>
+                                <h3>Login</h3>
+                                <Form onSubmit={loginHandler}>
+                                    <Form.Group controlId="formBasicEmail">
+                                        <Form.Label>Email address</Form.Label>
+                                        <Form.Control type="email" placeholder="Enter email" name="email" required />
+                                    </Form.Group>
 
-                                <Form.Group controlId="formBasicPassword">
-                                    <Form.Label>Password</Form.Label>
-                                    <Form.Control type="password" placeholder="Password" name="password" required />
-                                </Form.Group>
-                                <Button variant="primary" type="submit">
-                                    Submit
+                                    <Form.Group controlId="formBasicPassword">
+                                        <Form.Label>Password</Form.Label>
+                                        <Form.Control type="password" placeholder="Password" name="password" required />
+                                    </Form.Group>
+                                    <Button variant="primary" type="submit">
+                                        Submit
                         </Button>
-                            </Form>
-                        </Card.Body>
-                        <Link to="/register">
-                            <Button variant="outline-success" style={{ width: '100%' }}>
-                                Don't have an account? Register Here.
+                                </Form>
+                            </Card.Body>
+                            <Link to="/register">
+                                <Button variant="outline-success" style={{ width: '100%' }}>
+                                    Don't have an account? Register Here.
                             </Button>
-                        </Link>
-                    </Card>
-                </Col>
-            </Row>
-            <Loader show={showLoader} />
-            <AlertComponent show={alert.show} type={alert.type} message={alert.message} />
-        </StyledContainer >);
+                            </Link>
+                        </Card>
+                    </Col>
+                </Row>
+                <Loader show={showLoader} />
+                <AlertComponent show={alert.show} type={alert.type} message={alert.message} />
+            </StyledContainer >);
 
 }
 
