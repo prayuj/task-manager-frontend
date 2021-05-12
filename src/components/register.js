@@ -23,8 +23,6 @@ const StyledContainer = styled(Container)`
     flex-direction: column;
 `
 
-
-
 const Register = () => {
     const [userLoggedIn, setLogin] = useState(false);
     const [showLoader, setShowLoader] = useState(false)
