@@ -157,7 +157,7 @@ const Dashboard = () => {
             action: 'add',
             title: 'Add Task',
             description: '',
-            completed: true,
+            completed: false,
             handler: addTaskHandler
         })
         handleModalShow()
