@@ -19,3 +19,12 @@
 .row {
   padding: 5%;
 }
+
+.edit_cols {
+  display: flex;
+  align-items: center;
+}
+
+.fas {
+  cursor: pointer;
+}
