@@ -125,7 +125,6 @@ const Dashboard = () => {
         handleModalClose()
 
         event.preventDefault();
-
         const description = event.target.elements.description.value
         const completed = event.target.elements.completed.checked
         const id = event.target.id
@@ -140,8 +139,8 @@ const Dashboard = () => {
         axios(options)
             .then(res => {
                 if (res.status === 200) {
-                    alertHandler('secondary', 'Updated Successfully')
                     setShouldGetTasks(true)
+                    alertHandler('secondary', 'Updated Successfully')
                 }
             })
             .catch(err => {
@@ -299,6 +298,25 @@ const Dashboard = () => {
         setURLParam('page', page)
     }
 
+    const createTaskEventObject = (task) => {
+        return {
+            target: {
+                elements: {
+                    description: {
+                        value: task.description
+                    },
+                    completed: {
+                        checked: task.completed
+                    }
+                },
+                id: task._id
+            },
+            preventDefault() {
+
+            }
+        }
+    }
+
     useEffect(() => {
 
         if (shouldGetTasks) {
@@ -335,8 +353,17 @@ const Dashboard = () => {
                             <tr key={i}>
                                 <td>{i + 1}</td>
                                 <td className={`${task.completed ? 'done' : ''}`}>{task.description}</td>
-                                <td>
-                                    <Button variant='warning' id={task._id} onClick={handleEditTaskModalShow} size="sm">Edit</Button>
+                                <td className='edit_cols'>
+                                    <Form.Check
+                                        type="switch"
+                                        id={"completed-" + i}
+                                        checked={task.completed}
+                                        onChange={() => {
+                                            task.completed = !task.completed;
+                                            updateTaskHandler(createTaskEventObject(task))
+                                        }}
+                                    />
+                                    <i class="fas fa-edit" id={task._id} onClick={handleEditTaskModalShow}></i>
                                 </td>
                             </tr>
                         </tbody>

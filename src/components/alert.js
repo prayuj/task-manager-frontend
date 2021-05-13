@@ -2,23 +2,28 @@ import Alert from 'react-bootstrap/Alert'
 import styled from 'styled-components'
 
 const StyledDiv = styled.div`
-        position: fixed;
-        height: 100vh;
-        width: 100vw;
-        z-index: 1060;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    z-index: 1060;
     `
+
+const StyledAlert = styled(Alert)`
+    position: absolute;
+    width: 100%;
+    text-align: center;
+`
+
+
 
 const AlertComponent = ({ show, type, message }) => {
 
     if (show)
         return (
             <StyledDiv>
-                <Alert variant={type}>
+                <StyledAlert variant={type}>
                     {message}
-                </Alert>
+                </StyledAlert>
             </StyledDiv>
         );
     return null;
